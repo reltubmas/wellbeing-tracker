@@ -14,7 +14,7 @@ import {
 
 type EntityKey =
   | 'mood' | 'sleep' | 'fluid' | 'food' | 'urine' | 'stool' | 'journal'
-  | 'bloodTest' | 'measurements' | 'bloodPressure' | 'metrics' | 'pain' | 'healthlensScore';
+  | 'bloodTest' | 'measurements' | 'bloodPressure' | 'metrics' | 'pain' | 'healthlensScore' | 'microGoals';
 
 const SCHEMAS: Record<EntityKey, Schema> = {
   mood: {
@@ -178,7 +178,30 @@ const SCHEMAS: Record<EntityKey, Schema> = {
       { name: 'notes', label: 'Notes', type: 'textarea' },
     ],
   },
+  microGoals: {
+  collection: 'microGoals',
+  title: 'Micro Goals',
+  defaultValues: {
+    monday: false, tuesday: false, wednesday: false,
+    thursday: false, friday: false, saturday: false, sunday: false,
+  },
+  fields: [
+    { name: 'weekStart', label: 'Week starting', type: 'date' },
+    { name: 'goalText', label: 'Goal', type: 'text', placeholder: 'e.g., 5 days of movement' },
+    { name: 'monday', label: 'Monday', type: 'checkbox' },
+    { name: 'tuesday', label: 'Tuesday', type: 'checkbox' },
+    { name: 'wednesday', label: 'Wednesday', type: 'checkbox' },
+    { name: 'thursday', label: 'Thursday', type: 'checkbox' },
+    { name: 'friday', label: 'Friday', type: 'checkbox' },
+    { name: 'saturday', label: 'Saturday', type: 'checkbox' },
+    { name: 'sunday', label: 'Sunday', type: 'checkbox' },
+    { name: 'notes', label: 'Notes', type: 'textarea' },
+  ],
+},
 };
+
+
+
 
 function prettyDate(iso: string | undefined) {
   if (!iso) return '';
