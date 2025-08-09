@@ -1,8 +1,11 @@
-
-import React, { useMemo, useState } from 'react';
+// src/App.tsx
+import React, { useMemo, useState, useEffect } from 'react';
 import RecordForm, { Schema } from './components/RecordForm';
 import RecordList from './components/RecordList';
-import { loadCollection, upsert, remove, exportAll, importAll, clearAll } from './lib/storage';
+import {
+  listRecords, addRecord, updateRecord, deleteRecord,
+  exportCollection, importCollection, type RecordRow
+} from './data/api';
 
 type EntityKey =
   | 'mood' | 'sleep' | 'fluid' | 'food' | 'urine' | 'stool' | 'journal'
@@ -156,65 +159,75 @@ function prettyDate(iso: string | undefined) {
 const App: React.FC = () => {
   const [active, setActive] = useState<EntityKey>('mood');
   const schema = SCHEMAS[active];
-  const [editing, setEditing] = useState<any | null>(null);
-  const [refresh, setRefresh] = useState(0);
+  const [editing, setEditing] = useState<RecordRow | null>(null);
+  const [items, setItems] = useState<RecordRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const items = useMemo(() => {
-    const list = loadCollection(schema.collection);
-    // Sort newest first by date or createdAt
-    return [...list].sort((a,b) => String(b.date || b.createdAt).localeCompare(String(a.date || a.createdAt)));
-  }, [schema.collection, refresh]);
-
-  function handleSave(values: any) {
-    const payload = editing ? { ...editing, ...values } : values;
-    upsert(schema.collection, payload);
-    setEditing(null);
-    setRefresh(x => x + 1);
+  // Load whenever collection changes or after a save/delete
+  async function load() {
+    setLoading(true);
+    try {
+      const rows = await listRecords(schema.collection);
+      setItems(rows);
+    } finally {
+      setLoading(false);
+    }
   }
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [schema.collection]);
 
-  function handleDelete(id: string) {
-    if (confirm('Delete this record?')) {
-      remove(schema.collection, id);
-      setRefresh(x => x + 1);
+  async function handleSave(values: any) {
+    if (editing) {
+      const updated = await updateRecord(editing.id, values);
+      setItems(prev => prev.map(r => (r.id === editing.id ? updated : r)));
+      setEditing(null);
+    } else {
+      const created = await addRecord(schema.collection, values);
+      setItems(prev => [created, ...prev]);
     }
   }
 
-  function exportData() {
-    const blob = new Blob([exportAll()], { type: 'application/json' });
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this record?')) return;
+    await deleteRecord(id);
+    setItems(prev => prev.filter(r => r.id !== id));
+  }
+
+  async function exportData() {
+    const json = await exportCollection(schema.collection);
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'wellbeing-data.json';
+    a.download = `wellbeing-${schema.collection}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  function importData(ev: React.ChangeEvent<HTMLInputElement>) {
+  async function importData(ev: React.ChangeEvent<HTMLInputElement>) {
     const file = ev.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        importAll(String(reader.result));
-        setRefresh(x => x + 1);
-        alert('Import complete.');
-      } catch (e) {
-        alert('Import failed: ' + (e as Error).message);
-      }
-    };
-    reader.readAsText(file);
+    const text = await file.text();
+    try {
+      await importCollection(schema.collection, text);
+      await load();
+      alert('Import complete.');
+    } catch (e: any) {
+      alert('Import failed: ' + (e.message ?? String(e)));
+    } finally {
+      ev.target.value = '';
+    }
   }
 
-  function resetAll() {
-    if (confirm('This clears ALL saved data. Continue?')) {
-      clearAll();
-      setRefresh(x => x + 1);
-    }
+  async function resetAll() {
+    // Soft "reset": delete all rows currently shown
+    if (!confirm(`Delete ALL ${schema.title} records?`)) return;
+    for (const r of items) await deleteRecord(r.id);
+    await load();
   }
 
   const columns = schema.fields
     .filter(f => f.name !== 'notes' && f.type !== 'textarea')
-    .slice(0, 4) // show up to 4 columns + date
+    .slice(0, 4)
     .map(f => ({
       key: f.name,
       label: f.label,
@@ -268,12 +281,12 @@ const App: React.FC = () => {
             <h2 className="text-lg font-semibold">{schema.title} Records</h2>
             <span className="text-xs text-slate-500">{items.length} total</span>
           </div>
-          <RecordList items={items} onEdit={setEditing} onDelete={handleDelete} columns={tableColumns} />
+          <RecordList items={items} onEdit={setEditing} onDelete={handleDelete} columns={tableColumns as any} />
         </section>
       </main>
 
       <footer className="text-center text-xs text-slate-500 py-8">
-        Data is stored locally in your browser (no account required). Use Export/Import to move devices.
+        Data is stored securely in the cloud (your account only). Export/Import moves a single category between devices.
       </footer>
     </div>
   );
