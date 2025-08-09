@@ -163,7 +163,7 @@ const SCHEMAS: Record<EntityKey, Schema> = {
     title: 'Healthlens Score',
     fields: [
       { name: 'date', label: 'Date', type: 'date' },
-      { name: 'respiratoryRate', label: 'Resp Rate (bpm)', type: 'number' }
+      { name: 'respiratoryRate', label: 'Resp Rate (bpm)', type: 'number' },
       { name: 'bpSysHL', label: 'BP Systolic', type: 'number' },
       { name: 'bpDiaHL', label: 'BP Diastolic', type: 'number' },
       { name: 'cardiacWorkloadDB', label: 'Cardiac Workload (dB)', type: 'number' },
