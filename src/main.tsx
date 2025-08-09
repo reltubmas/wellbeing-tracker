@@ -1,22 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import Auth from './Auth';
-import EntryForm from './EntryForm';
-import EntriesList from './EntriesList';
+import App from './App';          // <- this must be App
+import './styles.css';             // or whatever your styles file is
 
-function App() {
-  const [reloadKey, setReloadKey] = React.useState(0);
-  return (
-    <div className="p-4 space-y-4 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold">Wellbeing tracker</h1>
-      <Auth />
-      <EntryForm onSaved={() => setReloadKey(k => k + 1)} />
-      {/* remount the list after save to force refresh */}
-      <div key={reloadKey}><EntriesList /></div>
-    </div>
-  );
-}
+console.log('BOOT: main.tsx (Wellbeing app)');
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode><App /></React.StrictMode>
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
 );

@@ -1,7 +1,12 @@
+import AuthGate from './components/AuthGate';
+
+console.log('BOOT: App.tsx (Supabase build)');
+
 // src/App.tsx
 import React, { useMemo, useState, useEffect } from 'react';
 import RecordForm, { Schema } from './components/RecordForm';
 import RecordList from './components/RecordList';
+
 import {
   listRecords, addRecord, updateRecord, deleteRecord,
   exportCollection, importCollection, type RecordRow
@@ -240,6 +245,7 @@ const App: React.FC = () => {
   ];
 
   return (
+  <AuthGate>
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">Wellbeing Tracker</h1>
@@ -289,6 +295,7 @@ const App: React.FC = () => {
         Data is stored securely in the cloud (your account only). Export/Import moves a single category between devices.
       </footer>
     </div>
+  </AuthGate>
   );
 };
 

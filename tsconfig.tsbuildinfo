@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/components/recordform.tsx","./src/components/recordlist.tsx","./src/lib/storage.ts"],"version":"5.9.2"}
+{"root":["./src/app.tsx","./src/entrieslist.tsx","./src/entryform.tsx","./src/main.tsx","./src/supabaseclient.ts","./src/components/authgate.tsx","./src/components/recordform.tsx","./src/components/recordlist.tsx","./src/data/api.ts","./src/lib/storage.ts"],"version":"5.9.2"}
