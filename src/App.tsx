@@ -14,7 +14,7 @@ import {
 
 type EntityKey =
   | 'mood' | 'sleep' | 'fluid' | 'food' | 'urine' | 'stool' | 'journal'
-  | 'bloodTest' | 'measurements' | 'metrics' | 'pain' | 'healthlensScore';
+  | 'bloodTest' | 'measurements' | 'bloodPressure' | 'metrics' | 'pain' | 'healthlensScore';
 
 const SCHEMAS: Record<EntityKey, Schema> = {
   mood: {
@@ -22,8 +22,8 @@ const SCHEMAS: Record<EntityKey, Schema> = {
     title: 'Mood',
     fields: [
       { name: 'date', label: 'Date', type: 'date' },
-      { name: 'rating', label: 'Rating (1-10)', type: 'number' },
-      { name: 'tags', label: 'Tags (comma-separated)', type: 'text', placeholder: 'anxious, focused' },
+      { name: 'moodType', label: 'Mood Type', type: 'select', options: ['High Enery Pleasant', 'High Energy Unpleasant', 'Low Energy Pleasant', 'Low Energy Unpleasant'] },
+      { name: 'mood', label: 'Mood', type: 'text', placeholder: 'anxious, focused' },
       { name: 'notes', label: 'Notes', type: 'textarea' },
     ],
   },
@@ -59,6 +59,8 @@ const SCHEMAS: Record<EntityKey, Schema> = {
       { name: 'description', label: 'Description', type: 'text' },
       { name: 'calories', label: 'Calories', type: 'number' },
       { name: 'proteinG', label: 'Protein (g)', type: 'number' },
+      { name: 'fatsG', label: 'Fats (g)', type: 'number' },
+      { name: 'carbohydratesG', label: 'Carbohydrates (g)', type: 'number' },
       { name: 'notes', label: 'Notes', type: 'textarea' },
     ],
   },
@@ -69,7 +71,6 @@ const SCHEMAS: Record<EntityKey, Schema> = {
       { name: 'date', label: 'Date', type: 'date' },
       { name: 'color', label: 'Color', type: 'select', options: ['Clear', 'Pale', 'Yellow', 'Dark Yellow', 'Amber'] },
       { name: 'clarity', label: 'Clarity', type: 'select', options: ['Clear', 'Slightly Cloudy', 'Cloudy'] },
-      { name: 'frequency', label: 'Frequency (per day)', type: 'number' },
       { name: 'notes', label: 'Notes', type: 'textarea' },
     ],
   },
@@ -109,13 +110,29 @@ const SCHEMAS: Record<EntityKey, Schema> = {
     title: 'Measurements',
     fields: [
       { name: 'date', label: 'Date', type: 'date' },
+      { name: 'waistIn', label: 'Waist (in)', type: 'number' },
+      { name: 'chestIn', label: 'Chest (in)', type: 'number' },
+      { name: 'bicepsIn', label: 'Biceps (in)', type: 'number' },
+      { name: 'thighsIn', label: 'Thighs (in)', type: 'number' },
+      { name: 'calvesIn', label: 'Calves (in)', type: 'number' },
+      { name: 'neckIn', label: 'Neck (in)', type: 'number' },
       { name: 'weightKg', label: 'Weight (kg)', type: 'number' },
-      { name: 'bodyFatPct', label: 'Body Fat (%)', type: 'number' },
-      { name: 'waistCm', label: 'Waist (cm)', type: 'number' },
+      { name: 'burpeesMin', label: 'Burpees (per min)', type: 'number' },
+      { name: '5kRunTime', label: '5km Run Time', type: 'time' },
+      { name: 'bleepTestLvl', label: 'Bleep Test Level', type: 'number' },
+      { name: 'heartRateRec', label: 'Heart Rate Recovery (in bpm)', type: 'number' },
+      { name: 'oneSquatRep', label: 'One Squat Rep (x BW)', type: 'number' },
+      { name: 'oneBenchRep', label: 'One Bench Rep (x BW)', type: 'number' },
+      { name: 'verticalJumpIn', label: 'Vertical Jump (in)', type: 'number' },
+    ],
+  },
+  bloodPressure: {
+    collection: 'bloodPressure',
+    title: 'Blood Pressure',
+    fields: [
       { name: 'bpSys', label: 'BP Systolic', type: 'number' },
       { name: 'bpDia', label: 'BP Diastolic', type: 'number' },
-      { name: 'hrBpm', label: 'Heart Rate (bpm)', type: 'number' },
-    ],
+    ]
   },
   metrics: {
     collection: 'metrics',
@@ -137,6 +154,7 @@ const SCHEMAS: Record<EntityKey, Schema> = {
       { name: 'intensity', label: 'Intensity (0-10)', type: 'number' },
       { name: 'durationMin', label: 'Duration (minutes)', type: 'number' },
       { name: 'triggers', label: 'Triggers', type: 'text' },
+      { name: 'intervention', label: 'Intervention', type: 'text' },
       { name: 'notes', label: 'Notes', type: 'textarea' },
     ],
   },
@@ -145,7 +163,18 @@ const SCHEMAS: Record<EntityKey, Schema> = {
     title: 'Healthlens Score',
     fields: [
       { name: 'date', label: 'Date', type: 'date' },
-      { name: 'score', label: 'Score (0-100)', type: 'number' },
+      { name: 'respiratoryRate', label: 'Resp Rate (bpm)', type: 'number' }
+      { name: 'bpSysHL', label: 'BP Systolic', type: 'number' },
+      { name: 'bpDiaHL', label: 'BP Diastolic', type: 'number' },
+      { name: 'cardiacWorkloadDB', label: 'Cardiac Workload (dB)', type: 'number' },
+      { name: 'CVDiseaseRisk', label: 'Cardiovascular disease risk (%)', type: 'number' },
+      { name: 'heartAttackRisk', label: 'Heart Attack Risk (%)', type: 'number' },
+      { name: 'strokeRisk', label: 'Stroke Risk (%)', type: 'number' },
+      { name: 'heartRateBPM', label: 'Heart Rate (bpm)', type: 'number' },
+      { name: 'heartRateVariabilityMS', label: 'Heart Rate Variability (ms)', type: 'number' },
+      { name: 'mentalWellbeing', label: 'Mental Wellbeing', type: 'number' },
+      { name: 'stressIndex', label: 'Stress Index', type: 'number' },
+      { name: 'vascularCapacity', label: 'Vascular Capacity', type: 'number' },
       { name: 'notes', label: 'Notes', type: 'textarea' },
     ],
   },
